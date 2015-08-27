@@ -4,12 +4,19 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var ipfilter = require('express-ip-access-control');
+
+var config = require('./config.json');
 
 var app = express();
+app.set('port',config.server.port);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+
+// IP Filter
+app.use(ipfilter({mode: 'allow',allows: config.ipWhitelist, statusCode: 401}));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
