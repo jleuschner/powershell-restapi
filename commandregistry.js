@@ -107,9 +107,27 @@ var o365CommandRegistry = {
     *
     ********************************/
 
-    /*******************************
-    * MsolUser
-    ********************************/
+    'getMüll': {
+      'command': 'get-ADUser -filter {name = "Müll*"} | ConvertTo-Json -Compress',
+      'arguments': {
+        'filter': {quoted : false}
+      },
+      'return': { type: 'json' }
+    },
+    'getADUser': {
+      'command': 'get-ADUser {{{arguments}}} | ConvertTo-Json -Compress',
+      'arguments': {
+        'filter': {quoted : false}
+      },
+      'return': { type: 'json' }
+    },
+    'getADComputer': {
+      'command': 'get-ADComputer {{{arguments}}} | ConvertTo-Json -Compress',
+      'arguments': {
+        'filter': {quoted : false}
+      },
+      'return': { type: 'json' }
+    },
 
     'Resolve-DnsName': {
       'command': 'Resolve-DnsName {{{arguments}}} | ConvertTo-Json -Compress',

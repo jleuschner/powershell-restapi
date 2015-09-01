@@ -1,4 +1,4 @@
-var express = require('express');
+﻿var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -16,7 +16,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // IP Filter
-app.use(ipfilter({mode: 'allow',allows: config.ipWhitelist, statusCode: 401}));
+app.use(ipfilter({mode: 'allow',allows: config.ipWhitelist, statusCode: 401, message:{'error': { 'name': 'UnauthorizedName', 'message': 'UnauthorizedMsg' }} }));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -30,14 +30,18 @@ var PSCommandService = require('powershell-command-executor');
 var StatefulProcessCommandProxy = require('stateful-process-command-proxy');
 var CommandRegistry = require('./commandregistry');
 
+var logger = function(severity,origin,message) {
+	if (severity.toUpperCase() != "VERBOSE") {
+		console.log("LOGGER: "+severity.toUpperCase() + ' ' + origin + ' ' + message);
+	}
+}
+
 var CommandProxy = new StatefulProcessCommandProxy({
   name: "CommandProxy",
   max: 3,
   min: 0,
   idleTimeoutMS: 30000,
-  logFunction: function(severity,origin,msg) {
-    console.log(severity.toUpperCase() + " " +origin+" "+ msg);
-  },
+	logFunction: logger,
   processCommand: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
   processArgs:    ['-Command','-'],
   processRetainMaxCmdHistory : 20,
@@ -50,7 +54,8 @@ var CommandProxy = new StatefulProcessCommandProxy({
   processEnvMap : null,
   processUid : null,
   processGid : null,
-  initCommands : [ 'Import-Modul activedirectory' ],
+  //initCommands : [ 'Import-Modul activedirectory'],
+  initCommands : [ 'Import-Modul activedirectory','chcp 65001','$OutputEncoding = [System.Text.Encoding]::GetEncoding(65001)' ],
   /*  Array von Befehlen, die beim Start einer Shell ausgeführt werden, zB: Import-Module ...
   initCommands: o365Utils.getO365PSInitCommands(
                   PATH_TO_DECRYPT_UTILS_SCRIPT,
@@ -74,7 +79,9 @@ var CommandProxy = new StatefulProcessCommandProxy({
   });
 
 var myLogFunction = function(severity,origin,message) {
-  console.log(severity.toUpperCase() + ' ' + origin + ' ' + message);
+	if (severity.toUpperCase() != "VERBOSE") {
+		console.log("CS: "+severity.toUpperCase() + ' ' + origin + ' ' + message);
+	}
 }
 
 var CommandService = new PSCommandService(CommandProxy,CommandRegistry.Commands,myLogFunction);
@@ -82,6 +89,12 @@ var CommandService = new PSCommandService(CommandProxy,CommandRegistry.Commands,
 // GET command-service status
 app.get('/command-service/status', function(req, res, next) {
     var status = CommandService.getStatus();
+    res.send(status);
+});
+
+// GET command-service status
+app.get('/command-proxy/status', function(req, res, next) {
+    var status = CommandProxy.getStatus();
     res.send(status);
 });
 
@@ -103,9 +116,9 @@ app.post('/command/generate/:commandName', function(req, res, next) {
 
 // POST (execute command)
 app.post('/command/execute/:commandName', function(req, res, next) {
-	console.log("BODY: ");
-	console.log(req.body);
-	CommandService.execute(req.params.commandName,req.body)
+	//console.log("BODY: ");
+	//console.log(JSON.stringify(req.body));
+	CommandService.execute(req.params.commandName,JSON.parse(JSON.stringify(req.body)))
       .then(function(cmdResult) {
           res.send(cmdResult);
       }).catch(function(error) {
