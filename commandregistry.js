@@ -117,7 +117,8 @@ var o365CommandRegistry = {
     'getADUser': {
       'command': 'get-ADUser {{{arguments}}} | ConvertTo-Json -Compress',
       'arguments': {
-        'filter': {quoted : false}
+        'filter': {quoted : false},
+				'properties': {quoted : false}
       },
       'return': { type: 'json' }
     },
