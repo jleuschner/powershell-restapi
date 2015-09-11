@@ -38,9 +38,9 @@ var logger = function(severity,origin,message) {
 
 var CommandProxy = new StatefulProcessCommandProxy({
   name: "CommandProxy",
-  max: 3,
-  min: 0,
-  idleTimeoutMS: 30000,
+  max: 8,
+  min: 1,
+  idleTimeoutMS: 180000,
 	logFunction: logger,
   processCommand: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
   processArgs:    ['-Command','-'],
@@ -54,27 +54,16 @@ var CommandProxy = new StatefulProcessCommandProxy({
   processEnvMap : null,
   processUid : null,
   processGid : null,
-  //initCommands : [ 'Import-Modul activedirectory'],
-  initCommands : [ 'Import-Modul activedirectory','chcp 65001','$OutputEncoding = [System.Text.Encoding]::GetEncoding(65001)' ],
-  /*  Array von Befehlen, die beim Start einer Shell ausgeführt werden, zB: Import-Module ...
-  initCommands: o365Utils.getO365PSInitCommands(
-                  PATH_TO_DECRYPT_UTILS_SCRIPT,
-                  PATH_TO_ENCRYPTED_CREDENTIALS_FILE,
-                  PATH_TO_SECRET_KEY,
-                  10000,30000,60000),
-	*/
-    validateFunction: function(processProxy) {
-      return processProxy.isValid();
-    },
-    /* Array von Befehlen, die vor dem Beenden der Shell ausgeführt werden
-	preDestroyCommands: o365Utils.getO365PSDestroyCommands(),
-    */
-    /* Intervallprüfung, ob Shell noch gültig
-	autoInvalidationConfig: o365Utils.getO365AutoInvalidationConfig(30000),
-	*/
-	/*
-	processCmdBlacklistRegex: o365Utils.getO365BlacklistedCommands(),
-    processCmdWhitelistRegex: o365Utils.getO365WhitelistedCommands()
+	initCommands : CommandRegistry.PSInitCommands(),
+  //initCommands : [ 'chcp 65001','$OutputEncoding = [System.Text.Encoding]::GetEncoding(65001)','Import-Modul activedirectory' ],
+  validateFunction: function(processProxy) {
+    return processProxy.isValid();
+  },
+  /*
+	preDestroyCommands: CommandRegistry.PSDestroyCommands(),
+	processCmdBlacklistRegex: CommandRegistry.BlacklistedCommands(),
+	processCmdWhitelistRegex: CommandRegistry.WhitelistedCommands()
+	autoInvalidationConfig: CommandRegistry..AutoInvalidationConfig(30000),
 	*/
   });
 

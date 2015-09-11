@@ -1,57 +1,21 @@
-module.exports.getO365PSInitCommands = function(pathToDecryptUtilScript,
-                                                pathToCredsFile,
-                                                pathToKeyFile,
-                                                openTimeout,
-                                                operationTimeout,
-                                                idleTimeout) {
+module.exports.PSInitCommands = function() {
   return [
-        // #0 Encoding UTF8
+        // Encoding UTF8
         'chcp 65001',
         '$OutputEncoding = [System.Text.Encoding]::GetEncoding(65001)',
 
-        // #1 import some basics
-        'Import-Module MSOnline',
-
-        // #2 source the decrypt utils script
-        // https://github.com/bitsofinfo/powershell-credential-encryption-tools/blob/master/decryptUtil.ps1
-        ('. ' + pathToDecryptUtilScript),
-
-        // #3 invoke decrypt2PSCredential to get the PSCredential object
-        // this function is provided by the sourced file above
-        ('$PSCredential = decrypt2PSCredential ' + pathToCredsFile + ' ' + pathToKeyFile),
-
-        // #4+ establish the session to o365
-        ('$sessionOpt = New-PSSessionOption -OpenTimeout '+openTimeout+' -OperationTimeout '+operationTimeout+' -IdleTimeout ' + idleTimeout),
-        '$session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $PSCredential -Authentication Basic -AllowRedirection -SessionOption $sessionOpt',
-
-        // #5 import the relevant cmdlets (TODO: make this configurable)
-        'Import-PSSession $session -CommandName *DistributionGroup* -AllowClobber',
-        'Import-PSSession $session -CommandName *Contact* -AllowClobber',
-
-        // #6 connect to azure as well
-        'Connect-MsolService -Credential $PSCredential',
-
-        // #7 cleanup
-        'Remove-Variable -Force -ErrorAction SilentlyContinue $PSCredential'
+        // Module
+        'Import-Module Import-Modul activedirectory'
   ]
 }
 
-/**
-* Destroy commands that correspond to the session
-* established w/ the initCommands above
-*/
-module.exports.getO365PSDestroyCommands = function() {
+module.exports.PSDestroyCommands = function() {
     return [
-          'Get-PSSession | Remove-PSSession',
-          'Remove-PSSession -Session $session',
-          'Remove-Module MsOnline'
+          'Remove-Module activedirectory'
           ]
   }
 
-/**
-* Some example blacklisted commands
-*/
-module.exports.getO365BlacklistedCommands = function() {
+module.exports.BlacklistedCommands = function() {
   return [
       {'regex':'.*Invoke-Expression.*', 'flags':'i'},
       {'regex':'.*ScriptBlock.*', 'flags':'i'},
@@ -67,7 +31,7 @@ module.exports.getO365BlacklistedCommands = function() {
 * Configuration auto invalidation, checking PSSession availability
 * @param checkIntervalMS
 */
-module.exports.getO365AutoInvalidationConfig = function(checkIntervalMS) {
+module.exports.AutoInvalidationConfig = function(checkIntervalMS) {
       return {
               'checkIntervalMS': checkIntervalMS,
               'commands': [
@@ -81,17 +45,7 @@ module.exports.getO365AutoInvalidationConfig = function(checkIntervalMS) {
   }
 
 
-/**
-* Defines a registry of Powershell commands
-* that can be injected into the PSCommandService
-* instance.
-*
-* Note these are just some example configurations specifically for a few
-* o365 functions and limited arguments for each, (they work) however you may want to
-* replace this with your own set of init command tailored to your specific
-* use-case
-*/
-var o365CommandRegistry = {
+var CommandRegistry = {
 
     /*******************************
     *
@@ -107,10 +61,20 @@ var o365CommandRegistry = {
     *
     ********************************/
 
-    'getMüll': {
-      'command': 'get-ADUser -filter {name = "Müll*"} | ConvertTo-Json -Compress',
+    'TestConnection': {
+      'command': 'Test-Connection {{{arguments}}}  | ConvertTo-Json -Compress',
       'arguments': {
-        'filter': {quoted : false}
+        'computername': {quoted : false},
+				'count': {quoted : false, valued: true, default: '1' },
+        'quiet': {quoted : false, valued: false},
+      },
+      'return': { type: 'json' }
+    },
+    'getADComputer': {
+      'command': 'get-ADComputer {{{arguments}}} | ConvertTo-Json -Compress',
+      'arguments': {
+        'filter': {quoted : false},
+				'properties': {quoted : false}
       },
       'return': { type: 'json' }
     },
@@ -122,18 +86,24 @@ var o365CommandRegistry = {
       },
       'return': { type: 'json' }
     },
-    'getADComputer': {
-      'command': 'get-ADComputer {{{arguments}}} | ConvertTo-Json -Compress',
-      'arguments': {
-        'filter': {quoted : false}
-      },
-      'return': { type: 'json' }
-    },
-
-    'Resolve-DnsName': {
+    'ResolveDnsName': {
       'command': 'Resolve-DnsName {{{arguments}}} | ConvertTo-Json -Compress',
       'arguments': {
         'name': {}
+      },
+      'return': { type: 'json' }
+    },
+    'getMissingUpdates': {
+			'command': 'get-wmiobject -query "SELECT * FROM CCM_SoftwareUpdate" -namespace "ROOT\\ccm\\ClientSDK" {{{arguments}}} | ConvertTo-Json -Compress',
+      'arguments': {
+        'computername': {quoted : false}
+      },
+      'return': { type: 'json' }
+    },
+    'getUpdatesCount': {
+			'command': 'get-wmiobject -query "SELECT name FROM CCM_SoftwareUpdate" -namespace "ROOT\\ccm\\ClientSDK" {{{arguments}}} | measure | ConvertTo-Json -Compress',
+      'arguments': {
+        'computername': {quoted : false}
       },
       'return': { type: 'json' }
     },
@@ -338,16 +308,16 @@ var o365CommandRegistry = {
     }
 };
 
-module.exports.Commands = o365CommandRegistry;
+module.exports.Commands = CommandRegistry;
 
 /**
 * Some example whitelisted commands
 * (only permit) what is in the registry
 */
-module.exports.getO365WhitelistedCommands = function() {
+module.exports.WhitelistedCommands = function() {
     var whitelist = [];
-    for (var cmdName in o365CommandRegistry) {
-        var config = o365CommandRegistry[cmdName];
+    for (var cmdName in CommandRegistry) {
+        var config = CommandRegistry[cmdName];
         var commandStart = config.command.substring(0,config.command.indexOf(' ')).trim();
         whitelist.push({'regex':'^'+commandStart+'\\s+.*', 'flags':'i'});
     }
