@@ -4,8 +4,10 @@ REST-API zur Ausführung von Powershell-Commands. Commands sind in commandregist
 - npm install
 - Config.json anpassen
 - npm start
+
+
 ### Test
-    curl -X POST -d name="www.google.com" http://localhost:3100/command/execute/ResolveDnsName
+	curl -X POST -d name="www.google.com" http://localhost:3100/command/execute/ResolveDnsName
 ---
 ##### config.json
     {
@@ -46,9 +48,10 @@ c:\windows\system32\WindowsPowerShell\v1.0\profile.ps1:
 ### Consolen-Font festsetzen
 Zur korrekten Darstellung der Umlaute in UTF8 wird als Consolen-Font 'Lucida Console' benötigt. Ein Bug in der Powershell verhindert allerdings, das dieser Font als Standard eingestellt bleibt. Daher dieser Workaround mit einem geänderten Font  
 (http://www.bdhphoto.com/application-downloads/powershell-font-fix-lucida/ )
-* \consolefont\lucon1.ttf installieren
-* In HKLM:\\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\Console\TrueTypeFont "Lucida Console" in "LucidaConsoleNew" umbennen
-* Unter HKCU::\Console\...  FontName auf "LucidaConsoleNew" ändern.
+- \consolefont\lucon1.ttf installieren
+- In HKLM:\\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\Console\TrueTypeFont "Lucida Console" in "LucidaConsoleNew" umbennen
+- Unter HKCU:\\Console\...  FontName auf "LucidaConsoleNew" ändern.
+
 ---
 ## Installation als Windows-Dienst
     install-service.cmd
