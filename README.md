@@ -26,7 +26,7 @@ REST-API zur Ausführung von Powershell-Commands. Commands sind in commandregist
     }
 ---
 ## FIX:
-##### node_modules\powershell-command-executor\pcCommandService.js
+##### node_modules\powershell-command-executor\psCommandService.js
 
     PSCommandService.prototype._sanitize = function(toSanitize,isQuoted)
     ...
