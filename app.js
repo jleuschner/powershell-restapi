@@ -38,9 +38,9 @@ var logger = function(severity,origin,message) {
 
 var CommandProxy = new StatefulProcessCommandProxy({
   name: "CommandProxy",
-  max: 8,
-  min: 1,
-  idleTimeoutMS: 180000,
+  max: config.powershell.max,
+  min: config.powershell.min,
+  idleTimeoutMS: config.powershell.idleTimeout,
 	logFunction: logger,
   processCommand: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
   processArgs:    ['-Command','-'],
@@ -55,7 +55,6 @@ var CommandProxy = new StatefulProcessCommandProxy({
   processUid : null,
   processGid : null,
 	initCommands : CommandRegistry.PSInitCommands(),
-  //initCommands : [ 'chcp 65001','$OutputEncoding = [System.Text.Encoding]::GetEncoding(65001)','Import-Modul activedirectory' ],
   validateFunction: function(processProxy) {
     return processProxy.isValid();
   },
