@@ -52,6 +52,9 @@ Zur korrekten Darstellung der Umlaute in UTF8 wird als Consolen-Font 'Lucida Con
 - In HKLM:\\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\Console\TrueTypeFont "Lucida Console" in "LucidaConsoleNew" umbennen
 - Unter HKCU:\\Console\...  FontName auf "LucidaConsoleNew" ändern.
 
+### Server-Features
+Für die AD-Powershell-Commands müssen die Server-Features "Remote-verwaltungstools - Rollenverwaltungstools - AD DS- und AD LDS-Tools - AD DS-Snap-Ins und -Befehlszeilentools" installiert sein.
+
 ---
 ## Installation als Windows-Dienst
     install-service.cmd
