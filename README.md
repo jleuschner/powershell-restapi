@@ -30,10 +30,10 @@ REST-API zur Ausführung von Powershell-Commands. Commands sind in commandregist
 
     PSCommandService.prototype._sanitize = function(toSanitize,isQuoted)
     ...
-        toSanitize = toSanitize.replace(/([;\$\|\(\)\[\]\\])/g, "`$1");
+        toSanitize = toSanitize.replace(/([;\$\|\[\]\\])/g, "`$1");
         //toSanitize = toSanitize.replace(/([;\$\|\(\)\{\}\[\]\\])/g, "`$1");
 
-{ und } werden sonst durch \`{ und \`{ ersetzt !!!
+{ und }, sowie ( und ) werden sonst durch \`{ und \`{, bzw. \`( und \`) ersetzt !!!
 Dadurch können Parameter wie -filter { name -like 'bla*' } nicht verarbeitet werden.
 
 ----
