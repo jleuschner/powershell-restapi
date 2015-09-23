@@ -49,7 +49,7 @@ var CommandRegistry = {
 
     /*******************************
     *
-    * o365 Powershell Command registry
+    * Powershell Command registry
     *
     * argument properties (optional):
     *    - quoted: true|false, default true
@@ -61,6 +61,23 @@ var CommandRegistry = {
     *
     ********************************/
 
+    'changePasswd': {
+      'command': 'Set-ADAccountPassword {{{arguments}}}',
+      'arguments': {
+        'Identity': {quoted : false},
+        'OldPassword': {quoted : false},
+        'NewPassword': {quoted : false}
+      },
+      'return': { type: 'json' }
+    },
+    'setPasswd': {
+      'command': 'Set-ADAccountPassword {{{arguments}}} -Reset',
+      'arguments': {
+        'Identity': {quoted : false},
+        'NewPassword': {quoted : false}
+      },
+      'return': { type: 'json' }
+    },
     'TestConnection': {
       'command': 'Test-Connection {{{arguments}}}  | ConvertTo-Json -Compress',
       'arguments': {
