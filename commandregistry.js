@@ -87,6 +87,13 @@ var CommandRegistry = {
       },
       'return': { type: 'json' }
     },
+    'getSmsSoftware': {
+      'command': 'get-wmiobject {{{arguments}}} -query "SELECT * FROM SMS_InstalledSoftware" -namespace "root\\CIMV2\\sms" | select Publisher,SoftwareCode, ProductName,UninstallString | ConvertTo-Json -Compress',
+      'arguments': {
+        'computername': {quoted : false},
+      },
+      'return': { type: 'json' }
+    },
     'getADComputer': {
       'command': 'get-ADComputer {{{arguments}}} | ConvertTo-Json -Compress',
       'arguments': {
